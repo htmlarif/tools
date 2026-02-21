@@ -3,809 +3,295 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Age Calculator (বাংলা/English) - জন্মতারিখ দিয়ে বয়স বের করুন</title>
+  <title>Age Calculator (বাংলা/English)</title>
+  <meta name="description" content="Simple Age Calculator - বাংলা/English" />
 
-  <!-- Basic SEO -->
-  <meta name="description" content="Age Calculator (বাংলা/English): জন্মতারিখ দিয়ে বয়স (বছর, মাস, দিন) বের করুন। দ্রুত, সহজ, মোবাইল ফ্রেন্ডলি।" />
-  <link rel="canonical" href="https://example.com/age-calculator/" />
-
-  <!-- Open Graph (share) -->
-  <meta property="og:title" content="Age Calculator (বাংলা/English) - জন্মতারিখ দিয়ে বয়স বের করুন" />
-  <meta property="og:description" content="জন্মতারিখ দিয়ে বয়স (বছর, মাস, দিন) দ্রুত হিসাব করুন। 100% ব্রাউজারে চলে।" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://example.com/age-calculator/" />
-
-  <!-- Minimal, fast CSS -->
   <style>
     :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#5b6b8c;
+      --line:rgba(15,23,42,.08);
+      --btn:#2e6bff;
+      --btnText:#ffffff;
+      --shadow:0 10px 30px rgba(15,23,42,.08);
+    }
+
+    body.dark{
       --bg:#0b1220;
       --card:#101a2e;
-      --muted:#93a4c7;
       --text:#eaf0ff;
+      --muted:#93a4c7;
       --line:rgba(255,255,255,.10);
       --btn:#2e6bff;
-      --btn2:#2f3e62;
-      --ok:#32d583;
-      --bad:#ff6b6b;
-      --shadow: 0 12px 40px rgba(0,0,0,.35);
-      --radius: 18px;
-      --pad: 16px;
-      --max: 980px;
-      --tap: 46px;
-      font-synthesis-weight:none;
-      text-rendering:optimizeLegibility;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
+      --btnText:#ffffff;
+      --shadow:0 12px 40px rgba(0,0,0,.35);
     }
+
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans Bengali", "Noto Sans", sans-serif;
-      background: radial-gradient(1200px 800px at 20% 10%, rgba(46,107,255,.25), transparent 45%),
-                  radial-gradient(1000px 700px at 80% 0%, rgba(50,213,131,.18), transparent 40%),
-                  var(--bg);
+      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
       color:var(--text);
-      line-height:1.45;
     }
-    a{color:#9bb7ff; text-decoration:none}
-    a:hover{text-decoration:underline}
-    .wrap{max-width:var(--max); margin:0 auto; padding:24px 16px 60px}
+
+    .wrap{
+      max-width:720px;
+      margin:auto;
+      padding:20px;
+    }
+
     header{
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      margin-bottom:18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
     }
-    .brand{
-      display:flex; align-items:center; gap:10px;
-      font-weight:800; letter-spacing:.2px;
-    }
-    .logo{
-      width:38px; height:38px; border-radius:14px;
-      background: linear-gradient(135deg, rgba(46,107,255,.9), rgba(50,213,131,.85));
-      box-shadow: 0 10px 25px rgba(46,107,255,.18);
-    }
-    .top-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
-    .pill{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      padding:8px 10px;
-      border-radius:999px;
-      color:var(--text);
-      display:flex; align-items:center; gap:8px;
-      user-select:none;
-    }
-    .pill select, .pill button{
-      background:transparent; border:none; color:var(--text);
-      font:inherit; cursor:pointer;
-    }
-    .pill select{outline:none}
-    .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap:16px;
-      align-items:start;
-    }
-    @media (max-width: 880px){
-      .grid{grid-template-columns: 1fr}
-    }
+
     .card{
+      background:var(--card);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:var(--shadow);
       border:1px solid var(--line);
-      background: rgba(16,26,46,.78);
-      backdrop-filter: blur(10px);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 16px;
     }
-    h1{margin:0 0 8px; font-size: 22px}
-    .sub{margin:0; color:var(--muted); font-size: 14px}
-    .hint{
-      margin-top:10px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px dashed rgba(255,255,255,.18);
-      color:var(--muted);
-      font-size: 13px;
-    }
-    .form{
-      margin-top:14px;
-      display:grid;
-      gap:12px;
-    }
+
+    h1{margin:0 0 6px;font-size:22px}
+    .sub{margin:0;color:var(--muted);font-size:14px}
+
     label{
+      font-size:13px;
+      color:var(--muted);
       display:block;
-      font-size: 13px;
-      color: var(--muted);
       margin-bottom:6px;
     }
-    input[type="date"]{
+
+    input{
       width:100%;
-      height: var(--tap);
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      padding: 10px 12px;
-      outline:none;
-    }
-    input[type="date"]:focus{
-      border-color: rgba(46,107,255,.65);
-      box-shadow: 0 0 0 4px rgba(46,107,255,.16);
-    }
-    .row{
-      display:flex; gap:10px; flex-wrap:wrap;
-    }
-    .btn{
-      height: var(--tap);
-      border-radius: 14px;
-      border: 1px solid transparent;
-      padding: 0 14px;
-      cursor:pointer;
-      font-weight: 700;
-      font-size: 14px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      user-select:none;
-    }
-    .btn.primary{background: var(--btn); color: #fff}
-    .btn.secondary{background: rgba(47,62,98,.55); border-color: var(--line); color: var(--text)}
-    .btn:active{transform: translateY(1px)}
-    .mini{
-      font-size: 12px; color: var(--muted);
-    }
-    .error{
-      color: var(--bad);
-      font-size: 13px;
-      margin-top: 6px;
-      display:none;
-    }
-    .result{
-      display:grid;
-      gap:10px;
-      margin-top: 14px;
-    }
-    .result .box{
+      height:46px;
+      border-radius:12px;
       border:1px solid var(--line);
-      background: rgba(0,0,0,.14);
-      border-radius: 16px;
-      padding: 12px;
+      padding:10px;
+      font-size:14px;
     }
+
+    .row{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      height:46px;
+      padding:0 14px;
+      border:none;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .primary{
+      background:var(--btn);
+      color:var(--btnText);
+    }
+
+    .secondary{
+      background:var(--card);
+      border:1px solid var(--line);
+      color:var(--text);
+    }
+
     .kpi{
       display:grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns:repeat(3,1fr);
       gap:10px;
+      margin-top:14px;
     }
-    @media (max-width: 520px){
-      .kpi{grid-template-columns:1fr}
-    }
-    .kpi .tile{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      border-radius: 16px;
-      padding: 12px;
-    }
-    .kpi .num{
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing:.2px;
-    }
-    .kpi .lab{color:var(--muted); font-size: 12px}
-    .success{
-      color: var(--ok);
-      font-weight: 700;
-      font-size: 13px;
-      display:none;
-    }
-    details{
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.12);
-      border-radius: 16px;
-      padding: 10px 12px;
-    }
-    summary{
-      cursor:pointer;
-      font-weight:800;
-      list-style:none;
-    }
-    summary::-webkit-details-marker{display:none}
-    .faq{display:grid; gap:10px}
-    footer{
-      margin-top:18px;
-      color: var(--muted);
-      font-size: 13px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-    .links{display:flex; gap:12px; flex-wrap:wrap}
-    .sr-only{
-      position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
-      clip:rect(0,0,0,0); border:0;
-    }
-  </style>
 
-  <!-- FAQ Schema (update url/name later) -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"FAQPage",
-    "mainEntity":[
-      {
-        "@type":"Question",
-        "name":"How does the age calculator work?",
-        "acceptedAnswer":{"@type":"Answer","text":"It calculates the difference between your date of birth and today's date and shows your age in years, months, and days."}
-      },
-      {
-        "@type":"Question",
-        "name":"এই Age Calculator কি একদম ফ্রি?",
-        "acceptedAnswer":{"@type":"Answer","text":"হ্যাঁ, এটি সম্পূর্ণ ফ্রি। আপনার ডেটা শুধু ব্রাউজারেই থাকে।"}
-      },
-      {
-        "@type":"Question",
-        "name":"Does it work offline?",
-        "acceptedAnswer":{"@type":"Answer","text":"Yes. Once the page is loaded, it works inside your browser without sending data to a server."}
-      },
-      {
-        "@type":"Question",
-        "name":"Leap year (অধিবর্ষ) হলে কি সমস্যা হবে?",
-        "acceptedAnswer":{"@type":"Answer","text":"না। তারিখ গণনা ব্রাউজারের ডেট সিস্টেম দিয়ে করা হয়, তাই অধিবর্ষের হিসাবও ঠিক থাকবে।"}
-      },
-      {
-        "@type":"Question",
-        "name":"Can I calculate age as of a specific date?",
-        "acceptedAnswer":{"@type":"Answer","text":"Yes. You can set a custom 'As of date' to calculate age for any date."}
-      }
-    ]
-  }
-  </script>
+    .tile{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px;
+      text-align:center;
+    }
+
+    .num{
+      font-size:22px;
+      font-weight:900;
+    }
+
+    .lab{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .summary{
+      margin-top:12px;
+      font-weight:800;
+      font-size:15px;
+    }
+
+    .top-controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    select{
+      height:36px;
+      border-radius:10px;
+      border:1px solid var(--line);
+    }
+
+  </style>
 </head>
 
 <body>
   <div class="wrap">
     <header>
-      <div class="brand" aria-label="Site brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <div id="siteName" style="font-size:14px; opacity:.95;">Tools</div>
-          <div class="mini" id="siteTag">Fast • Simple • Mobile friendly</div>
-        </div>
+      <div>
+        <strong>🧮 Tools</strong>
       </div>
 
-      <div class="top-actions">
-        <div class="pill" title="Language">
-          <span aria-hidden="true">🌐</span>
-          <label class="sr-only" for="langSelect">Language</label>
-          <select id="langSelect">
-            <option value="bn">বাংলা</option>
-            <option value="en">English</option>
-          </select>
-        </div>
+      <div class="top-controls">
+        <button class="secondary" id="modeToggle">🌙</button>
 
-        <div class="pill" title="Privacy note">
-          <span aria-hidden="true">🔒</span>
-          <span id="privacyNote">ডেটা ব্রাউজারেই থাকে</span>
-        </div>
+        <select id="lang">
+          <option value="bn">বাংলা</option>
+          <option value="en">English</option>
+        </select>
       </div>
     </header>
 
-    <div class="grid">
-      <!-- Tool -->
-      <section class="card" aria-labelledby="h1">
-        <h1 id="h1">Age Calculator</h1>
-        <p class="sub" id="subtitle">জন্মতারিখ দিয়ে বয়স (বছর, মাস, দিন) বের করুন—একদম সহজে।</p>
+    <div class="card">
+      <h1 id="title">Age Calculator</h1>
+      <p class="sub" id="subtitle">জন্মতারিখ দিয়ে বয়স বের করুন</p>
 
-        <div class="hint" id="hint">
-          ✅ টিপস: শুধু জন্মতারিখ দিন → Calculate চাপুন → Result পাবেন। (Advanced দরকার হলে নিচে আছে)
-        </div>
-
-        <div class="form" role="form" aria-label="Age calculator form">
-          <div>
-            <label for="dob" id="lblDob">জন্মতারিখ (Date of Birth)</label>
-            <input id="dob" type="date" inputmode="numeric" />
-            <div class="error" id="errDob">সঠিক জন্মতারিখ দিন।</div>
-          </div>
-
-          <details id="advancedBox">
-            <summary id="advTitle">Advanced (ঐচ্ছিক)</summary>
-            <div style="margin-top:10px">
-              <label for="asof" id="lblAsof">যে তারিখ পর্যন্ত বয়স দেখাবে (As of date)</label>
-              <input id="asof" type="date" inputmode="numeric" />
-              <div class="mini" id="asofMini">ফাঁকা রাখলে আজকের তারিখ ধরা হবে।</div>
-              <div class="error" id="errAsof">As of date জন্মতারিখের আগে হতে পারে না।</div>
-            </div>
-          </details>
-
-          <div class="row">
-            <button class="btn primary" id="btnCalc" type="button">Calculate</button>
-            <button class="btn secondary" id="btnReset" type="button">Reset</button>
-            <button class="btn secondary" id="btnCopy" type="button">Copy Result</button>
-          </div>
-
-          <div class="success" id="copyOk">✅ Copied</div>
-        </div>
-
-        <div class="result" aria-live="polite" aria-atomic="true">
-          <div class="box">
-            <div class="kpi">
-              <div class="tile">
-                <div class="num" id="years">—</div>
-                <div class="lab" id="labYears">Years</div>
-              </div>
-              <div class="tile">
-                <div class="num" id="months">—</div>
-                <div class="lab" id="labMonths">Months</div>
-              </div>
-              <div class="tile">
-                <div class="num" id="days">—</div>
-                <div class="lab" id="labDays">Days</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="box">
-            <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-              <div>
-                <div class="mini" id="exactTitle">Exact age summary</div>
-                <div style="font-weight:900; font-size:16px; margin-top:4px" id="summary">—</div>
-              </div>
-              <div class="mini" id="extra">
-                <div><span id="labTotalDays">Total days</span>: <b id="totalDays">—</b></div>
-                <div><span id="labNextBday">Next birthday in</span>: <b id="nextBday">—</b></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SEO-friendly content -->
-      <aside class="card" aria-label="Help and FAQ">
-        <h2 style="margin:0 0 8px; font-size:18px" id="howTitle">How to use</h2>
-        <ol style="margin:0; padding-left:18px; color:var(--muted)" id="howList">
-          <li>Enter your Date of Birth (জন্মতারিখ)।</li>
-          <li>Click Calculate (Calculate চাপুন)।</li>
-          <li>See your age in Years, Months, and Days.</li>
-        </ol>
-
-        <div style="height:12px"></div>
-
-        <h2 style="margin:0 0 8px; font-size:18px" id="faqTitle">FAQ</h2>
-        <div class="faq" id="faq">
-          <details>
-            <summary id="q1">এই টুল কি ফ্রি?</summary>
-            <div class="mini" id="a1" style="margin-top:8px">হ্যাঁ, সম্পূর্ণ ফ্রি। ডেটা আপনার ব্রাউজারেই থাকে—কোথাও আপলোড হয় না।</div>
-          </details>
-          <details>
-            <summary id="q2">Can I calculate age for a past/future date?</summary>
-            <div class="mini" id="a2" style="margin-top:8px">Yes. Use “As of date” in Advanced to calculate age for any specific date.</div>
-          </details>
-          <details>
-            <summary id="q3">অধিবর্ষ (Leap year) হলে কি ঠিক থাকবে?</summary>
-            <div class="mini" id="a3" style="margin-top:8px">ঠিক থাকবে। ব্রাউজারের date system অনুযায়ী সঠিক ক্যালকুলেশন হয়।</div>
-          </details>
-          <details>
-            <summary id="q4">Does this tool store my data?</summary>
-            <div class="mini" id="a4" style="margin-top:8px">No. It works inside your browser and does not send your dates to any server.</div>
-          </details>
-          <details>
-            <summary id="q5">Why do I see different results in some calculators?</summary>
-            <div class="mini" id="a5" style="margin-top:8px">Some calculators approximate months as 30 days. This tool uses real calendar months and days.</div>
-          </details>
-        </div>
-
-        <div style="height:14px"></div>
-        <div class="hint" id="relatedHint">
-          🔗 Related tools (soon): Percentage Calculator • Date Difference • GPA/CGPA
-        </div>
-      </aside>
-    </div>
-
-    <footer>
-      <div class="links">
-        <a href="./" id="lnkHome">Home</a>
-        <a href="./privacy.html" id="lnkPrivacy">Privacy</a>
-        <a href="./about.html" id="lnkAbout">About</a>
-        <a href="./contact.html" id="lnkContact">Contact</a>
+      <div style="margin-top:12px">
+        <label id="lblDob">জন্মতারিখ</label>
+        <input type="date" id="dob">
       </div>
-      <div id="footNote">© <span id="yearNow"></span> Tools</div>
-    </footer>
+
+      <div class="row">
+        <button class="primary" id="calcBtn">Calculate</button>
+        <button class="secondary" id="resetBtn">Reset</button>
+      </div>
+
+      <div class="kpi">
+        <div class="tile">
+          <div class="num" id="years">—</div>
+          <div class="lab" id="labYears">Years</div>
+        </div>
+
+        <div class="tile">
+          <div class="num" id="months">—</div>
+          <div class="lab" id="labMonths">Months</div>
+        </div>
+
+        <div class="tile">
+          <div class="num" id="days">—</div>
+          <div class="lab" id="labDays">Days</div>
+        </div>
+      </div>
+
+      <div class="summary" id="summary">—</div>
+    </div>
   </div>
 
-  <script>
-    // ---------- i18n ----------
-    const I18N = {
-      bn: {
-        langAttr: "bn",
-        siteName: "Tools",
-        siteTag: "দ্রুত • সহজ • মোবাইল ফ্রেন্ডলি",
-        privacyNote: "ডেটা ব্রাউজারেই থাকে",
-        h1: "Age Calculator",
-        subtitle: "জন্মতারিখ দিয়ে বয়স (বছর, মাস, দিন) বের করুন—একদম সহজে।",
-        hint: "✅ টিপস: শুধু জন্মতারিখ দিন → Calculate চাপুন → Result পাবেন। (Advanced দরকার হলে নিচে আছে)",
-        lblDob: "জন্মতারিখ (Date of Birth)",
-        lblAsof: "যে তারিখ পর্যন্ত বয়স দেখাবে (As of date)",
-        asofMini: "ফাঁকা রাখলে আজকের তারিখ ধরা হবে।",
-        advTitle: "Advanced (ঐচ্ছিক)",
-        btnCalc: "Calculate",
-        btnReset: "Reset",
-        btnCopy: "Copy Result",
-        errDob: "সঠিক জন্মতারিখ দিন।",
-        errAsof: "As of date জন্মতারিখের আগে হতে পারে না।",
-        copyOk: "✅ কপি হয়েছে",
-        labYears: "বছর",
-        labMonths: "মাস",
-        labDays: "দিন",
-        exactTitle: "সারাংশ",
-        labTotalDays: "মোট দিন",
-        labNextBday: "পরের জন্মদিন",
-        howTitle: "কীভাবে ব্যবহার করবেন",
-        howList: [
-          "জন্মতারিখ দিন।",
-          "Calculate চাপুন।",
-          "বছর, মাস, দিন হিসেবে বয়স দেখুন।"
-        ],
-        faqTitle: "প্রশ্নোত্তর (FAQ)",
-        q1: "এই টুল কি ফ্রি?",
-        a1: "হ্যাঁ, সম্পূর্ণ ফ্রি। ডেটা আপনার ব্রাউজারেই থাকে—কোথাও আপলোড হয় না।",
-        q2: "আমি কি নির্দিষ্ট তারিখ অনুযায়ী বয়স দেখতে পারি?",
-        a2: "পারবেন। Advanced থেকে “As of date” সেট করে যেকোনো তারিখে বয়স হিসাব করুন।",
-        q3: "অধিবর্ষ (Leap year) হলে কি ঠিক থাকবে?",
-        a3: "ঠিক থাকবে। ব্রাউজারের date system অনুযায়ী সঠিক ক্যালকুলেশন হয়।",
-        q4: "এই টুল কি আমার ডেটা রাখে?",
-        a4: "না। এটি ব্রাউজারের ভিতরেই কাজ করে, কোনো সার্ভারে ডেটা পাঠায় না।",
-        q5: "কখনো কখনো অন্য ক্যালকুলেটরের সাথে কেন মিলেনা?",
-        a5: "অনেকে মাসকে ৩০ দিন ধরে আনুমানিক হিসাব করে। এখানে বাস্তব ক্যালেন্ডার মাস/দিন ধরে হিসাব হয়।",
-        relatedHint: "🔗 Related tools (soon): Percentage Calculator • Date Difference • GPA/CGPA",
-        footerBrand: "Tools"
-      },
-      en: {
-        langAttr: "en",
-        siteName: "Tools",
-        siteTag: "Fast • Simple • Mobile-friendly",
-        privacyNote: "Data stays in your browser",
-        h1: "Age Calculator",
-        subtitle: "Calculate your age in years, months, and days — quickly and easily.",
-        hint: "✅ Tip: Enter your date of birth → Click Calculate → Get results. (Advanced options below)",
-        lblDob: "Date of Birth",
-        lblAsof: "As of date (optional)",
-        asofMini: "Leave empty to use today's date.",
-        advTitle: "Advanced (optional)",
-        btnCalc: "Calculate",
-        btnReset: "Reset",
-        btnCopy: "Copy Result",
-        errDob: "Please enter a valid date of birth.",
-        errAsof: "As of date cannot be before the date of birth.",
-        copyOk: "✅ Copied",
-        labYears: "Years",
-        labMonths: "Months",
-        labDays: "Days",
-        exactTitle: "Exact age summary",
-        labTotalDays: "Total days",
-        labNextBday: "Next birthday in",
-        howTitle: "How to use",
-        howList: [
-          "Enter your Date of Birth.",
-          "Click Calculate.",
-          "See your age in Years, Months, and Days."
-        ],
-        faqTitle: "FAQ",
-        q1: "Is this tool free?",
-        a1: "Yes, it's completely free. Your data stays in your browser and is not uploaded.",
-        q2: "Can I calculate age as of a specific date?",
-        a2: "Yes. Use “As of date” in Advanced to calculate age for any date.",
-        q3: "Does it handle leap years correctly?",
-        a3: "Yes. It uses the browser's calendar system, including leap years.",
-        q4: "Does this tool store my data?",
-        a4: "No. It runs in your browser and does not send dates to any server.",
-        q5: "Why do results differ from other calculators?",
-        a5: "Some calculators approximate months as 30 days. This one uses real calendar months and days.",
-        relatedHint: "🔗 Related tools (soon): Percentage Calculator • Date Difference • GPA/CGPA",
-        footerBrand: "Tools"
-      }
-    };
+<script>
+const lang = document.getElementById("lang");
 
-    const $ = (id) => document.getElementById(id);
+const I18N = {
+  bn:{
+    title:"Age Calculator",
+    subtitle:"জন্মতারিখ দিয়ে বয়স বের করুন",
+    dob:"জন্মতারিখ",
+    years:"বছর",
+    months:"মাস",
+    days:"দিন"
+  },
+  en:{
+    title:"Age Calculator",
+    subtitle:"Calculate your age instantly",
+    dob:"Date of Birth",
+    years:"Years",
+    months:"Months",
+    days:"Days"
+  }
+};
 
-    const els = {
-      siteName: $("siteName"),
-      siteTag: $("siteTag"),
-      privacyNote: $("privacyNote"),
-      h1: $("h1"),
-      subtitle: $("subtitle"),
-      hint: $("hint"),
-      lblDob: $("lblDob"),
-      lblAsof: $("lblAsof"),
-      asofMini: $("asofMini"),
-      advTitle: $("advTitle"),
-      btnCalc: $("btnCalc"),
-      btnReset: $("btnReset"),
-      btnCopy: $("btnCopy"),
-      errDob: $("errDob"),
-      errAsof: $("errAsof"),
-      copyOk: $("copyOk"),
-      labYears: $("labYears"),
-      labMonths: $("labMonths"),
-      labDays: $("labDays"),
-      exactTitle: $("exactTitle"),
-      labTotalDays: $("labTotalDays"),
-      labNextBday: $("labNextBday"),
-      howTitle: $("howTitle"),
-      howList: $("howList"),
-      faqTitle: $("faqTitle"),
-      q1: $("q1"), a1: $("a1"),
-      q2: $("q2"), a2: $("a2"),
-      q3: $("q3"), a3: $("a3"),
-      q4: $("q4"), a4: $("a4"),
-      q5: $("q5"), a5: $("a5"),
-      relatedHint: $("relatedHint"),
-      footNote: $("footNote"),
-      yearNow: $("yearNow")
-    };
+function setLang(l){
+  const t = I18N[l];
+  document.getElementById("title").textContent = t.title;
+  document.getElementById("subtitle").textContent = t.subtitle;
+  document.getElementById("lblDob").textContent = t.dob;
+  document.getElementById("labYears").textContent = t.years;
+  document.getElementById("labMonths").textContent = t.months;
+  document.getElementById("labDays").textContent = t.days;
+}
 
-    function setLanguage(lang){
-      const t = I18N[lang] || I18N.bn;
-      document.documentElement.lang = t.langAttr;
+lang.addEventListener("change",()=>setLang(lang.value));
+setLang("bn");
 
-      els.siteName.textContent = t.siteName;
-      els.siteTag.textContent = t.siteTag;
-      els.privacyNote.textContent = t.privacyNote;
+document.getElementById("calcBtn").onclick = () => {
+  const dob = new Date(document.getElementById("dob").value);
+  if(!document.getElementById("dob").value) return;
 
-      $("h1").textContent = t.h1;
-      els.subtitle.textContent = t.subtitle;
-      els.hint.textContent = t.hint;
+  const today = new Date();
+  let years = today.getFullYear() - dob.getFullYear();
+  let months = today.getMonth() - dob.getMonth();
+  let days = today.getDate() - dob.getDate();
 
-      els.lblDob.textContent = t.lblDob;
-      els.lblAsof.textContent = t.lblAsof;
-      els.asofMini.textContent = t.asofMini;
+  if(days < 0){
+    months--;
+    days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+  }
 
-      // details summary text needs special handling
-      $("advancedBox").querySelector("summary").textContent = t.advTitle;
+  if(months < 0){
+    years--;
+    months += 12;
+  }
 
-      els.btnCalc.textContent = t.btnCalc;
-      els.btnReset.textContent = t.btnReset;
-      els.btnCopy.textContent = t.btnCopy;
+  document.getElementById("years").textContent = years;
+  document.getElementById("months").textContent = months;
+  document.getElementById("days").textContent = days;
 
-      els.errDob.textContent = t.errDob;
-      els.errAsof.textContent = t.errAsof;
-      els.copyOk.textContent = t.copyOk;
+  document.getElementById("summary").textContent =
+    `${years}Y ${months}M ${days}D`;
+};
 
-      els.labYears.textContent = t.labYears;
-      els.labMonths.textContent = t.labMonths;
-      els.labDays.textContent = t.labDays;
+document.getElementById("resetBtn").onclick = () => {
+  document.getElementById("dob").value="";
+  document.getElementById("years").textContent="—";
+  document.getElementById("months").textContent="—";
+  document.getElementById("days").textContent="—";
+  document.getElementById("summary").textContent="—";
+};
 
-      els.exactTitle.textContent = t.exactTitle;
-      els.labTotalDays.textContent = t.labTotalDays;
-      els.labNextBday.textContent = t.labNextBday;
+// 🌗 Dark toggle
+const toggle = document.getElementById("modeToggle");
+const savedMode = localStorage.getItem("mode");
 
-      els.howTitle.textContent = t.howTitle;
-      els.howList.innerHTML = "";
-      t.howList.forEach(line=>{
-        const li = document.createElement("li");
-        li.textContent = line;
-        els.howList.appendChild(li);
-      });
+if(savedMode === "dark"){
+  document.body.classList.add("dark");
+  toggle.textContent = "☀️";
+}
 
-      els.faqTitle.textContent = t.faqTitle;
+toggle.onclick = () => {
+  document.body.classList.toggle("dark");
 
-      els.q1.textContent = t.q1; els.a1.textContent = t.a1;
-      els.q2.textContent = t.q2; els.a2.textContent = t.a2;
-      els.q3.textContent = t.q3; els.a3.textContent = t.a3;
-      els.q4.textContent = t.q4; els.a4.textContent = t.a4;
-      els.q5.textContent = t.q5; els.a5.textContent = t.a5;
+  if(document.body.classList.contains("dark")){
+    toggle.textContent = "☀️";
+    localStorage.setItem("mode","dark");
+  }else{
+    toggle.textContent = "🌙";
+    localStorage.setItem("mode","light");
+  }
+};
+</script>
 
-      els.relatedHint.textContent = t.relatedHint;
-      els.footNote.innerHTML = `© <span id="yearNow"></span> ${t.footerBrand}`;
-      els.yearNow = $("yearNow"); // refresh ref after innerHTML swap
-      els.yearNow.textContent = new Date().getFullYear();
-
-      // persist
-      localStorage.setItem("tool_lang", lang);
-    }
-
-    // ---------- Date helpers ----------
-    function parseDateInput(el){
-      const v = el.value;
-      if(!v) return null;
-      // v is YYYY-MM-DD from input[type=date]
-      const d = new Date(v + "T00:00:00");
-      if(Number.isNaN(d.getTime())) return null;
-      return d;
-    }
-    function startOfDay(d){
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    }
-    function daysBetween(a,b){
-      // a,b at startOfDay
-      const ms = b.getTime() - a.getTime();
-      return Math.round(ms / 86400000);
-    }
-
-    function addYears(d, years){
-      const x = new Date(d);
-      x.setFullYear(x.getFullYear() + years);
-      return x;
-    }
-    function addMonths(d, months){
-      const x = new Date(d);
-      x.setMonth(x.getMonth() + months);
-      return x;
-    }
-
-    function calculateAge(dob, asof){
-      // Ensure at start of day
-      dob = startOfDay(dob);
-      asof = startOfDay(asof);
-
-      // total days
-      const totalDays = daysBetween(dob, asof);
-
-      // years/months/days using calendar method
-      let years = asof.getFullYear() - dob.getFullYear();
-      let anchor = addYears(dob, years);
-      if(anchor > asof){
-        years--;
-        anchor = addYears(dob, years);
-      }
-
-      let months = (asof.getFullYear() - anchor.getFullYear()) * 12 + (asof.getMonth() - anchor.getMonth());
-      let anchor2 = addMonths(anchor, months);
-      if(anchor2 > asof){
-        months--;
-        anchor2 = addMonths(anchor, months);
-      }
-
-      const days = daysBetween(anchor2, asof);
-
-      return { years, months, days, totalDays };
-    }
-
-    function nextBirthdayInfo(dob, asof){
-      dob = startOfDay(dob);
-      asof = startOfDay(asof);
-
-      let next = new Date(asof.getFullYear(), dob.getMonth(), dob.getDate());
-      // Handle Feb 29: in non-leap years, JS rolls to Mar 1; we can keep it or choose Feb 28.
-      // We'll keep JS behavior (Mar 1) for simplicity and consistency.
-      if(next < asof){
-        next = new Date(asof.getFullYear() + 1, dob.getMonth(), dob.getDate());
-      }
-      const d = daysBetween(asof, next);
-      return { days: d, date: next };
-    }
-
-    function formatDateHuman(d, lang){
-      const opts = { year:"numeric", month:"short", day:"2-digit" };
-      try{
-        return d.toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US", opts);
-      }catch{
-        return d.toDateString();
-      }
-    }
-
-    // ---------- UI wiring ----------
-    const langSelect = $("langSelect");
-    const dobEl = $("dob");
-    const asofEl = $("asof");
-
-    const outYears = $("years");
-    const outMonths = $("months");
-    const outDays = $("days");
-    const outSummary = $("summary");
-    const outTotalDays = $("totalDays");
-    const outNextBday = $("nextBday");
-
-    function show(el, yes){ el.style.display = yes ? "block" : "none"; }
-
-    function runCalc(){
-      // reset errors
-      show(els.errDob, false);
-      show(els.errAsof, false);
-      show(els.copyOk, false);
-
-      const lang = langSelect.value;
-      const dob = parseDateInput(dobEl);
-      if(!dob){
-        show(els.errDob, true);
-        return;
-      }
-
-      const asof = parseDateInput(asofEl) || new Date();
-      if(startOfDay(asof) < startOfDay(dob)){
-        show(els.errAsof, true);
-        return;
-      }
-
-      const res = calculateAge(dob, asof);
-      outYears.textContent = res.years;
-      outMonths.textContent = res.months;
-      outDays.textContent = res.days;
-
-      // summary line
-      const dobTxt = formatDateHuman(dob, lang);
-      const asofTxt = formatDateHuman(asof, lang);
-      if(lang === "bn"){
-        outSummary.textContent = `${res.years} বছর ${res.months} মাস ${res.days} দিন (জন্ম: ${dobTxt}, হিসাব: ${asofTxt})`;
-      }else{
-        outSummary.textContent = `${res.years} years ${res.months} months ${res.days} days (DOB: ${dobTxt}, as of: ${asofTxt})`;
-      }
-
-      outTotalDays.textContent = res.totalDays.toLocaleString(lang === "bn" ? "bn-BD" : "en-US");
-
-      const nb = nextBirthdayInfo(dob, asof);
-      if(lang === "bn"){
-        outNextBday.textContent = `${nb.days.toLocaleString("bn-BD")} দিন (${formatDateHuman(nb.date, "bn")} )`;
-      }else{
-        outNextBday.textContent = `${nb.days.toLocaleString("en-US")} days (${formatDateHuman(nb.date, "en")} )`;
-      }
-    }
-
-    $("btnCalc").addEventListener("click", runCalc);
-    dobEl.addEventListener("change", () => {
-      // auto-calc when DOB changes (nice UX)
-      if(dobEl.value) runCalc();
-    });
-
-    $("btnReset").addEventListener("click", () => {
-      dobEl.value = "";
-      asofEl.value = "";
-      show(els.errDob, false);
-      show(els.errAsof, false);
-      show(els.copyOk, false);
-      outYears.textContent = "—";
-      outMonths.textContent = "—";
-      outDays.textContent = "—";
-      outSummary.textContent = "—";
-      outTotalDays.textContent = "—";
-      outNextBday.textContent = "—";
-      dobEl.focus();
-    });
-
-    $("btnCopy").addEventListener("click", async () => {
-      const txt = outSummary.textContent;
-      if(!txt || txt === "—") return;
-      try{
-        await navigator.clipboard.writeText(txt);
-        show(els.copyOk, true);
-        setTimeout(()=>show(els.copyOk, false), 1200);
-      }catch{
-        // fallback
-        const ta = document.createElement("textarea");
-        ta.value = txt;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        show(els.copyOk, true);
-        setTimeout(()=>show(els.copyOk, false), 1200);
-      }
-    });
-
-    // Enter key to calculate (accessibility)
-    document.addEventListener("keydown", (e)=>{
-      if(e.key === "Enter"){
-        const active = document.activeElement;
-        if(active === dobEl || active === asofEl){
-          e.preventDefault();
-          runCalc();
-        }
-      }
-    });
-
-    // ---------- Init ----------
-    $("yearNow").textContent = new Date().getFullYear();
-
-    const savedLang = localStorage.getItem("tool_lang");
-    if(savedLang && (savedLang === "bn" || savedLang === "en")){
-      langSelect.value = savedLang;
-    }
-    setLanguage(langSelect.value);
-
-    langSelect.addEventListener("change", () => {
-      setLanguage(langSelect.value);
-      // refresh computed output labels text + formatting
-      if(outSummary.textContent && outSummary.textContent !== "—") runCalc();
-    });
-  </script>
 </body>
 </html>
