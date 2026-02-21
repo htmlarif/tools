@@ -3,8 +3,48 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Age Calculator (বাংলা/English)</title>
-  <meta name="description" content="Simple Age Calculator - বাংলা/English" />
+  <title>Image Compressor Online (বাংলা/English) - Reduce Photo Size</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Image Compressor (বাংলা/English): ছবি/ফটো কমপ্রেস করে সাইজ কমান। Batch compress, JPG/WebP convert, ZIP download, সবকিছু ব্রাউজারেই—কোনো আপলোড লাগে না।" />
+  <link rel="canonical" href="https://example.com/image-compress/" />
+  <meta property="og:title" content="Image Compressor Online (বাংলা/English) - Reduce Photo Size" />
+  <meta property="og:description" content="Compress images in your browser. Batch, resize, JPG/WebP, ZIP download. No upload required." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://example.com/image-compress/" />
+
+  <!-- FAQ Schema (SEO boost) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"How to compress image to 100KB?",
+        "acceptedAnswer":{"@type":"Answer","text":"Use a lower quality (e.g., 55–70), choose WebP, and optionally resize the image width/height. Then compress and check the output size."}
+      },
+      {
+        "@type":"Question",
+        "name":"Does it upload my photos?",
+        "acceptedAnswer":{"@type":"Answer","text":"No. Compression happens inside your browser. Your files are not uploaded to a server."}
+      },
+      {
+        "@type":"Question",
+        "name":"PNG vs JPG vs WebP — which is best?",
+        "acceptedAnswer":{"@type":"Answer","text":"WebP usually gives the smallest size with good quality. JPG is great for photos. PNG is best for logos/screenshots and transparency but can be larger."}
+      },
+      {
+        "@type":"Question",
+        "name":"Can I compress multiple images at once?",
+        "acceptedAnswer":{"@type":"Answer","text":"Yes. You can add multiple images and download all results as a ZIP."}
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSZip for "Download all as ZIP" -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>
     :root{
@@ -12,286 +52,941 @@
       --card:#ffffff;
       --text:#0f172a;
       --muted:#5b6b8c;
-      --line:rgba(15,23,42,.08);
+      --line:rgba(15,23,42,.10);
       --btn:#2e6bff;
       --btnText:#ffffff;
+      --soft:#eef2ff;
+      --ok:#16a34a;
+      --bad:#dc2626;
       --shadow:0 10px 30px rgba(15,23,42,.08);
+      --radius:18px;
+      --tap:46px;
+      --max:1100px;
     }
-
     body.dark{
       --bg:#0b1220;
       --card:#101a2e;
       --text:#eaf0ff;
       --muted:#93a4c7;
-      --line:rgba(255,255,255,.10);
+      --line:rgba(255,255,255,.12);
       --btn:#2e6bff;
       --btnText:#ffffff;
+      --soft:rgba(46,107,255,.10);
+      --ok:#32d583;
+      --bad:#ff6b6b;
       --shadow:0 12px 40px rgba(0,0,0,.35);
     }
-
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans Bengali", "Noto Sans", sans-serif;
       background:var(--bg);
       color:var(--text);
+      line-height:1.45;
     }
-
-    .wrap{
-      max-width:720px;
-      margin:auto;
-      padding:20px;
-    }
-
+    a{color:#2e6bff; text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:var(--max); margin:0 auto; padding:20px 16px 60px;}
     header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:20px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      margin-bottom:16px;
     }
-
+    .brand{display:flex; align-items:center; gap:10px;}
+    .logo{
+      width:40px;height:40px;border-radius:14px;
+      background: linear-gradient(135deg, rgba(46,107,255,.95), rgba(22,163,74,.85));
+      box-shadow:0 10px 24px rgba(46,107,255,.15);
+    }
+    .brand b{font-size:14px}
+    .brand small{display:block;color:var(--muted); font-weight:600}
+    .controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .pill{
+      display:flex; align-items:center; gap:8px;
+      border:1px solid var(--line);
+      background:var(--card);
+      border-radius:999px;
+      padding:8px 10px;
+      box-shadow:0 6px 18px rgba(15,23,42,.05);
+    }
+    body.dark .pill{box-shadow:none}
+    .pill button, .pill select{
+      border:none; background:transparent; color:var(--text);
+      font:inherit; cursor:pointer;
+    }
+    .pill select{outline:none}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
     .card{
       background:var(--card);
-      border-radius:18px;
-      padding:18px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
       box-shadow:var(--shadow);
-      border:1px solid var(--line);
+      padding:16px;
     }
+    body.dark .card{box-shadow:var(--shadow)}
+    h1{margin:0 0 6px; font-size:22px}
+    .sub{margin:0; color:var(--muted); font-size:14px}
 
-    h1{margin:0 0 6px;font-size:22px}
-    .sub{margin:0;color:var(--muted);font-size:14px}
-
-    label{
-      font-size:13px;
-      color:var(--muted);
-      display:block;
-      margin-bottom:6px;
-    }
-
-    input{
-      width:100%;
-      height:46px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      padding:10px;
-      font-size:14px;
-    }
-
-    .row{
-      display:flex;
-      gap:10px;
-      margin-top:12px;
-      flex-wrap:wrap;
-    }
-
-    button{
-      height:46px;
-      padding:0 14px;
-      border:none;
-      border-radius:12px;
-      font-weight:700;
-      cursor:pointer;
-    }
-
-    .primary{
-      background:var(--btn);
-      color:var(--btnText);
-    }
-
-    .secondary{
-      background:var(--card);
-      border:1px solid var(--line);
-      color:var(--text);
-    }
-
-    .kpi{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-      margin-top:14px;
-    }
-
-    .tile{
-      border:1px solid var(--line);
+    .note{
+      margin-top:10px;
+      background:var(--soft);
+      border:1px dashed rgba(46,107,255,.35);
       border-radius:14px;
-      padding:10px;
-      text-align:center;
-    }
-
-    .num{
-      font-size:22px;
-      font-weight:900;
-    }
-
-    .lab{
-      font-size:12px;
+      padding:10px 12px;
       color:var(--muted);
+      font-size:13px;
     }
 
-    .summary{
+    .drop{
       margin-top:12px;
-      font-weight:800;
-      font-size:15px;
+      border:2px dashed rgba(46,107,255,.35);
+      border-radius:16px;
+      padding:14px;
+      background:rgba(46,107,255,.04);
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
     }
+    .drop strong{display:block}
+    .drop small{color:var(--muted)}
+    .drop.dragover{background:rgba(46,107,255,.10)}
 
-    .top-controls{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-
-    select{
-      height:36px;
-      border-radius:10px;
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:end}
+    .field{flex:1; min-width:200px}
+    label{display:block; color:var(--muted); font-size:13px; margin-bottom:6px}
+    input[type="range"]{width:100%}
+    input[type="number"], select{
+      width:100%;
+      height:var(--tap);
       border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      background:transparent;
+      color:var(--text);
+      outline:none;
+    }
+    input[type="number"]:focus, select:focus{
+      border-color: rgba(46,107,255,.65);
+      box-shadow:0 0 0 4px rgba(46,107,255,.14);
     }
 
+    .btn{
+      height:var(--tap);
+      border-radius:12px;
+      padding:0 14px;
+      border:1px solid transparent;
+      cursor:pointer;
+      font-weight:800;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      user-select:none;
+    }
+    .btn.primary{background:var(--btn); color:var(--btnText)}
+    .btn.secondary{background:transparent; border-color:var(--line); color:var(--text)}
+    .btn.ghost{background:rgba(46,107,255,.08); border-color:rgba(46,107,255,.10); color:var(--text)}
+    .btn:active{transform:translateY(1px)}
+    .mini{color:var(--muted); font-size:12px}
+
+    details{
+      margin-top:10px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:10px 12px;
+      background: rgba(15,23,42,.02);
+    }
+    body.dark details{background: rgba(0,0,0,.12)}
+    summary{cursor:pointer; font-weight:900; list-style:none}
+    summary::-webkit-details-marker{display:none}
+
+    .list{margin-top:14px; display:grid; gap:10px}
+    .item{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      display:grid;
+      grid-template-columns: 86px 1fr;
+      gap:12px;
+      align-items:center;
+      background: rgba(15,23,42,.02);
+    }
+    body.dark .item{background: rgba(0,0,0,.12)}
+    .thumb{
+      width:86px; height:86px; border-radius:14px;
+      border:1px solid var(--line);
+      overflow:hidden;
+      background: rgba(0,0,0,.06);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .thumb img{width:100%; height:100%; object-fit:cover}
+    .meta b{display:block; font-size:14px; word-break:break-word}
+    .meta .stats{margin-top:4px; color:var(--muted); font-size:12px}
+    .meta .stats span{display:inline-block; margin-right:10px}
+    .meta .actions{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap}
+    .tag{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:var(--card);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+    }
+    .ok{color:var(--ok); font-weight:900}
+    .bad{color:var(--bad); font-weight:900}
+    .progress{
+      margin-top:10px;
+      height:10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      overflow:hidden;
+      background: rgba(0,0,0,.04);
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(46,107,255,.95), rgba(22,163,74,.85));
+      transition: width .2s ease;
+    }
+
+    .side h2{margin:0 0 8px; font-size:18px}
+    .faq{display:grid; gap:10px}
+    .faq details{margin:0}
+    footer{
+      margin-top:16px;
+      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      color:var(--muted); font-size:13px;
+    }
+
+    .sr-only{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+      clip:rect(0,0,0,0);border:0;
+    }
   </style>
 </head>
 
 <body>
   <div class="wrap">
     <header>
-      <div>
-        <strong>🧮 Tools</strong>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <b id="siteName">Tools</b>
+          <small id="siteTag">Fast • Simple • Mobile-friendly</small>
+        </div>
       </div>
 
-      <div class="top-controls">
-        <button class="secondary" id="modeToggle">🌙</button>
+      <div class="controls">
+        <div class="pill" title="Theme">
+          <button id="modeToggle" aria-label="Toggle theme">🌙</button>
+        </div>
 
-        <select id="lang">
-          <option value="bn">বাংলা</option>
-          <option value="en">English</option>
-        </select>
+        <div class="pill" title="Language">
+          <span aria-hidden="true">🌐</span>
+          <label class="sr-only" for="lang">Language</label>
+          <select id="lang">
+            <option value="bn">বাংলা</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
+        <div class="pill" title="Privacy">
+          <span aria-hidden="true">🔒</span>
+          <span id="privacyNote" class="mini" style="font-weight:800;">ডেটা আপনার ডিভাইসেই থাকে</span>
+        </div>
       </div>
     </header>
 
-    <div class="card">
-      <h1 id="title">Age Calculator</h1>
-      <p class="sub" id="subtitle">জন্মতারিখ দিয়ে বয়স বের করুন</p>
+    <div class="grid">
+      <!-- MAIN TOOL -->
+      <section class="card" aria-labelledby="h1">
+        <h1 id="h1">Image Compressor</h1>
+        <p class="sub" id="subtitle">ছবির সাইজ কমান (KB/MB) — দ্রুত, সহজ, একদম ব্রাউজারেই।</p>
 
-      <div style="margin-top:12px">
-        <label id="lblDob">জন্মতারিখ</label>
-        <input type="date" id="dob">
-      </div>
-
-      <div class="row">
-        <button class="primary" id="calcBtn">Calculate</button>
-        <button class="secondary" id="resetBtn">Reset</button>
-      </div>
-
-      <div class="kpi">
-        <div class="tile">
-          <div class="num" id="years">—</div>
-          <div class="lab" id="labYears">Years</div>
+        <div class="note" id="privacyLong">
+          ✅ <b>Privacy:</b> আপনার ছবি কোথাও আপলোড হয় না। সব কাজ আপনার ব্রাউজারের ভিতরেই হয়।
         </div>
 
-        <div class="tile">
-          <div class="num" id="months">—</div>
-          <div class="lab" id="labMonths">Months</div>
+        <input id="fileInput" type="file" accept="image/*" multiple hidden />
+
+        <div id="dropZone" class="drop" role="button" tabindex="0" aria-label="Upload images">
+          <strong id="dropTitle">Drop images here</strong>
+          <small id="dropSub">or click to choose files (multiple supported)</small>
         </div>
 
-        <div class="tile">
-          <div class="num" id="days">—</div>
-          <div class="lab" id="labDays">Days</div>
-        </div>
-      </div>
+        <!-- Controls -->
+        <div class="row">
+          <div class="field">
+            <label id="lblQuality">Quality</label>
+            <input id="quality" type="range" min="10" max="95" value="75" />
+            <div class="mini"><span id="qualityVal">75</span>%</div>
+          </div>
 
-      <div class="summary" id="summary">—</div>
+          <div class="field">
+            <label id="lblFormat">Output format</label>
+            <select id="format">
+              <option value="keep">Keep original</option>
+              <option value="image/jpeg">JPG</option>
+              <option value="image/webp">WebP</option>
+              <option value="image/png">PNG</option>
+            </select>
+            <div class="mini" id="formatHint">WebP সাধারণত সবচেয়ে ছোট সাইজ দেয়।</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="btn ghost" id="presetSmall" type="button">Small</button>
+          <button class="btn ghost" id="presetMedium" type="button">Medium</button>
+          <button class="btn ghost" id="presetHigh" type="button">High</button>
+        </div>
+
+        <details id="advanced">
+          <summary id="advTitle">Advanced (Resize optional)</summary>
+          <div class="row" style="margin-top:10px">
+            <div class="field">
+              <label id="lblMaxW">Max width (px)</label>
+              <input id="maxW" type="number" min="0" placeholder="e.g. 1600" />
+              <div class="mini" id="maxWHint">0/empty রাখলে width change হবে না</div>
+            </div>
+            <div class="field">
+              <label id="lblMaxH">Max height (px)</label>
+              <input id="maxH" type="number" min="0" placeholder="e.g. 1600" />
+              <div class="mini" id="maxHHint">0/empty রাখলে height change হবে না</div>
+            </div>
+          </div>
+        </details>
+
+        <div class="row">
+          <button class="btn primary" id="btnCompress" type="button">Compress Now</button>
+          <button class="btn secondary" id="btnZip" type="button" disabled>Download all (ZIP)</button>
+          <button class="btn secondary" id="btnClear" type="button">Clear</button>
+        </div>
+
+        <div class="progress" aria-label="Progress">
+          <div class="bar" id="bar"></div>
+        </div>
+        <div class="mini" id="status" style="margin-top:8px;">—</div>
+
+        <!-- Results list -->
+        <div class="list" id="list" aria-label="Compressed files list"></div>
+
+        <div class="note" id="seoNote" style="margin-top:14px;">
+          <b id="useCasesTitle">Use cases:</b>
+          <span id="useCasesText">ফর্ম সাবমিট, ওয়েবসাইট আপলোড, ইমেইল, সোশ্যাল মিডিয়া—সব জায়গায় দ্রুত সাইজ কমাতে সাহায্য করে।</span>
+        </div>
+      </section>
+
+      <!-- SEO CONTENT / FAQ -->
+      <aside class="card side" aria-label="Help and FAQ">
+        <h2 id="howTitle">How to use</h2>
+        <ol id="howList" class="mini" style="margin:0; padding-left:18px;">
+          <li>Choose images (or drag & drop).</li>
+          <li>Select quality and format (WebP recommended).</li>
+          <li>Click “Compress Now” and download.</li>
+        </ol>
+
+        <div style="height:12px"></div>
+
+        <h2 id="faqTitle">FAQ</h2>
+        <div class="faq">
+          <details>
+            <summary id="q1">How to compress image to 100KB?</summary>
+            <div class="mini" id="a1" style="margin-top:8px">Quality 55–70, WebP format, and optionally resize width/height. Then compress and check the output size.</div>
+          </details>
+          <details>
+            <summary id="q2">Does it upload my photos?</summary>
+            <div class="mini" id="a2" style="margin-top:8px">No. Everything runs inside your browser—no server upload.</div>
+          </details>
+          <details>
+            <summary id="q3">PNG vs JPG vs WebP কোনটা ভালো?</summary>
+            <div class="mini" id="a3" style="margin-top:8px">Photos-এর জন্য JPG/WebP ভালো। WebP সাধারণত ছোট সাইজ দেয়। Logo/transparent দরকার হলে PNG ব্যবহার করুন।</div>
+          </details>
+          <details>
+            <summary id="q4">Can I compress multiple images at once?</summary>
+            <div class="mini" id="a4" style="margin-top:8px">Yes. Add multiple images and download all results as a ZIP.</div>
+          </details>
+          <details>
+            <summary id="q5">Will compression reduce quality?</summary>
+            <div class="mini" id="a5" style="margin-top:8px">Lower quality means smaller size but may reduce clarity. Use Medium/High presets for balanced results.</div>
+          </details>
+        </div>
+
+        <div style="height:14px"></div>
+        <div class="note" id="related">
+          🔗 <b id="relatedTitle">Related tools:</b>
+          <span id="relatedText">Resize Image • PNG to JPG • WebP Converter</span>
+        </div>
+      </aside>
     </div>
+
+    <footer>
+      <div>
+        <a href="./" id="lnkHome">Home</a> •
+        <a href="./privacy.html" id="lnkPrivacy">Privacy</a> •
+        <a href="./about.html" id="lnkAbout">About</a> •
+        <a href="./contact.html" id="lnkContact">Contact</a>
+      </div>
+      <div>© <span id="year"></span> Tools</div>
+    </footer>
   </div>
 
-<script>
-const lang = document.getElementById("lang");
+  <script>
+    // ---------- i18n ----------
+    const I18N = {
+      bn: {
+        siteTag: "দ্রুত • সহজ • মোবাইল ফ্রেন্ডলি",
+        privacyNote: "ডেটা আপনার ডিভাইসেই থাকে",
+        h1: "Image Compressor",
+        subtitle: "ছবির সাইজ কমান (KB/MB) — দ্রুত, সহজ, একদম ব্রাউজারেই।",
+        privacyLong: "✅ Privacy: আপনার ছবি কোথাও আপলোড হয় না। সব কাজ আপনার ব্রাউজারের ভিতরেই হয়।",
+        dropTitle: "এখানে ছবি ড্রপ করুন",
+        dropSub: "অথবা ক্লিক করে ছবি সিলেক্ট করুন (একসাথে অনেক ছবি)",
+        lblQuality: "Quality (গুণমান)",
+        lblFormat: "Output format",
+        formatHint: "WebP সাধারণত সবচেয়ে ছোট সাইজ দেয়।",
+        advTitle: "Advanced (Resize optional)",
+        lblMaxW: "Max width (px)",
+        lblMaxH: "Max height (px)",
+        maxWHint: "0/empty রাখলে width change হবে না",
+        maxHHint: "0/empty রাখলে height change হবে না",
+        small: "Small",
+        medium: "Medium",
+        high: "High",
+        compressNow: "Compress Now",
+        zip: "Download all (ZIP)",
+        clear: "Clear",
+        statusIdle: "—",
+        statusReady: (n)=> `✅ ${n} টি ছবি যোগ হয়েছে। এখন Compress Now চাপুন।`,
+        statusWorking: (i,n)=> `⏳ Compress হচ্ছে... ${i}/${n}`,
+        statusDone: (n)=> `✅ Done! ${n} টি ছবি কমপ্রেস হয়েছে।`,
+        formatKeep: "Keep original",
+        useCasesTitle: "Use cases:",
+        useCasesText: "ফর্ম সাবমিট, ওয়েবসাইট আপলোড, ইমেইল, সোশ্যাল মিডিয়া—সব জায়গায় দ্রুত সাইজ কমাতে সাহায্য করে।",
+        howTitle: "কীভাবে ব্যবহার করবেন",
+        howList: [
+          "ছবি সিলেক্ট করুন (বা drag & drop)।",
+          "Quality ও format সেট করুন (WebP ভালো)।",
+          "Compress Now চাপুন এবং ডাউনলোড করুন।"
+        ],
+        faqTitle: "প্রশ্নোত্তর (FAQ)",
+        q1:"100KB এ ছবি কমপ্রেস কীভাবে করবো?",
+        a1:"Quality 55–70 করুন, WebP বেছে নিন, দরকার হলে resize করুন। তারপর compress করে size দেখুন।",
+        q2:"এটা কি আমার ছবি আপলোড করে?",
+        a2:"না। সবকিছু আপনার ব্রাউজারের ভিতরে হয়—কোনো সার্ভারে আপলোড হয় না।",
+        q3:"PNG vs JPG vs WebP কোনটা ভালো?",
+        a3:"Photo-এর জন্য JPG/WebP ভালো। WebP সাধারণত ছোট সাইজ দেয়। Transparency দরকার হলে PNG।",
+        q4:"একসাথে অনেক ছবি কমপ্রেস করা যাবে?",
+        a4:"হ্যাঁ। অনেক ছবি যোগ করুন এবং সবগুলো ZIP হিসেবে ডাউনলোড করুন।",
+        q5:"Quality কি কমে যাবে?",
+        a5:"Quality কমালে size কমে, তবে clarity কমতে পারে। Medium/High preset দিয়ে balance রাখুন।",
+        relatedTitle:"Related tools:",
+        relatedText:"Resize Image • PNG to JPG • WebP Converter",
+        downloading:"Downloading…",
+        remove:"Remove",
+        download:"Download",
+        before:"Before",
+        after:"After",
+        saved:"Saved"
+      },
+      en: {
+        siteTag: "Fast • Simple • Mobile-friendly",
+        privacyNote: "Data stays on your device",
+        h1: "Image Compressor",
+        subtitle: "Compress photos (KB/MB) — fast, simple, right in your browser.",
+        privacyLong: "✅ Privacy: Your photos are not uploaded. Everything runs inside your browser.",
+        dropTitle: "Drop images here",
+        dropSub: "or click to choose files (multiple supported)",
+        lblQuality: "Quality",
+        lblFormat: "Output format",
+        formatHint: "WebP usually gives the smallest size.",
+        advTitle: "Advanced (Resize optional)",
+        lblMaxW: "Max width (px)",
+        lblMaxH: "Max height (px)",
+        maxWHint: "Leave empty/0 to keep width",
+        maxHHint: "Leave empty/0 to keep height",
+        small: "Small",
+        medium: "Medium",
+        high: "High",
+        compressNow: "Compress Now",
+        zip: "Download all (ZIP)",
+        clear: "Clear",
+        statusIdle: "—",
+        statusReady: (n)=> `✅ ${n} image(s) added. Click Compress Now.`,
+        statusWorking: (i,n)=> `⏳ Compressing... ${i}/${n}`,
+        statusDone: (n)=> `✅ Done! ${n} image(s) compressed.`,
+        formatKeep: "Keep original",
+        useCasesTitle: "Use cases:",
+        useCasesText: "Forms, website upload, email attachments, social media—reduce size quickly everywhere.",
+        howTitle: "How to use",
+        howList: [
+          "Choose images (or drag & drop).",
+          "Set quality and format (WebP recommended).",
+          "Click Compress Now and download."
+        ],
+        faqTitle: "FAQ",
+        q1:"How to compress an image to 100KB?",
+        a1:"Use quality 55–70, choose WebP, and optionally resize width/height. Then compress and check output size.",
+        q2:"Does it upload my photos?",
+        a2:"No. Everything runs inside your browser—no server upload.",
+        q3:"PNG vs JPG vs WebP — which is best?",
+        a3:"JPG/WebP are best for photos; WebP is often smaller. Use PNG for transparency/logos.",
+        q4:"Can I compress multiple images at once?",
+        a4:"Yes. Add multiple images and download all results as a ZIP.",
+        q5:"Will compression reduce quality?",
+        a5:"Lower quality reduces size but may reduce clarity. Use Medium/High presets for balance.",
+        relatedTitle:"Related tools:",
+        relatedText:"Resize Image • PNG to JPG • WebP Converter",
+        downloading:"Downloading…",
+        remove:"Remove",
+        download:"Download",
+        before:"Before",
+        after:"After",
+        saved:"Saved"
+      }
+    };
 
-const I18N = {
-  bn:{
-    title:"Age Calculator",
-    subtitle:"জন্মতারিখ দিয়ে বয়স বের করুন",
-    dob:"জন্মতারিখ",
-    years:"বছর",
-    months:"মাস",
-    days:"দিন"
-  },
-  en:{
-    title:"Age Calculator",
-    subtitle:"Calculate your age instantly",
-    dob:"Date of Birth",
-    years:"Years",
-    months:"Months",
-    days:"Days"
-  }
-};
+    const $ = (id)=>document.getElementById(id);
 
-function setLang(l){
-  const t = I18N[l];
-  document.getElementById("title").textContent = t.title;
-  document.getElementById("subtitle").textContent = t.subtitle;
-  document.getElementById("lblDob").textContent = t.dob;
-  document.getElementById("labYears").textContent = t.years;
-  document.getElementById("labMonths").textContent = t.months;
-  document.getElementById("labDays").textContent = t.days;
-}
+    // ---------- Theme ----------
+    const toggle = $("modeToggle");
+    const savedMode = localStorage.getItem("mode");
+    if(savedMode === "dark"){ document.body.classList.add("dark"); toggle.textContent = "☀️"; }
+    toggle.addEventListener("click", ()=>{
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      toggle.textContent = isDark ? "☀️" : "🌙";
+      localStorage.setItem("mode", isDark ? "dark":"light");
+    });
 
-lang.addEventListener("change",()=>setLang(lang.value));
-setLang("bn");
+    // ---------- Language ----------
+    const langSel = $("lang");
+    const savedLang = localStorage.getItem("tool_lang");
+    if(savedLang && (savedLang==="bn"||savedLang==="en")) langSel.value = savedLang;
 
-document.getElementById("calcBtn").onclick = () => {
-  const dob = new Date(document.getElementById("dob").value);
-  if(!document.getElementById("dob").value) return;
+    function setLang(lang){
+      const t = I18N[lang] || I18N.bn;
+      document.documentElement.lang = (lang==="bn"?"bn":"en");
 
-  const today = new Date();
-  let years = today.getFullYear() - dob.getFullYear();
-  let months = today.getMonth() - dob.getMonth();
-  let days = today.getDate() - dob.getDate();
+      $("siteTag").textContent = t.siteTag;
+      $("privacyNote").textContent = t.privacyNote;
+      $("h1").textContent = t.h1;
+      $("subtitle").textContent = t.subtitle;
+      $("privacyLong").innerHTML = t.privacyLong;
+      $("dropTitle").textContent = t.dropTitle;
+      $("dropSub").textContent = t.dropSub;
 
-  if(days < 0){
-    months--;
-    days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-  }
+      $("lblQuality").textContent = t.lblQuality;
+      $("lblFormat").textContent = t.lblFormat;
+      $("formatHint").textContent = t.formatHint;
 
-  if(months < 0){
-    years--;
-    months += 12;
-  }
+      $("advTitle").textContent = t.advTitle;
+      $("lblMaxW").textContent = t.lblMaxW;
+      $("lblMaxH").textContent = t.lblMaxH;
+      $("maxWHint").textContent = t.maxWHint;
+      $("maxHHint").textContent = t.maxHHint;
 
-  document.getElementById("years").textContent = years;
-  document.getElementById("months").textContent = months;
-  document.getElementById("days").textContent = days;
+      $("presetSmall").textContent = t.small;
+      $("presetMedium").textContent = t.medium;
+      $("presetHigh").textContent = t.high;
 
-  document.getElementById("summary").textContent =
-    `${years}Y ${months}M ${days}D`;
-};
+      $("btnCompress").textContent = t.compressNow;
+      $("btnZip").textContent = t.zip;
+      $("btnClear").textContent = t.clear;
 
-document.getElementById("resetBtn").onclick = () => {
-  document.getElementById("dob").value="";
-  document.getElementById("years").textContent="—";
-  document.getElementById("months").textContent="—";
-  document.getElementById("days").textContent="—";
-  document.getElementById("summary").textContent="—";
-};
+      $("status").textContent = t.statusIdle;
 
-// 🌗 Dark toggle
-const toggle = document.getElementById("modeToggle");
-const savedMode = localStorage.getItem("mode");
+      $("useCasesTitle").textContent = t.useCasesTitle;
+      $("useCasesText").textContent = t.useCasesText;
 
-if(savedMode === "dark"){
-  document.body.classList.add("dark");
-  toggle.textContent = "☀️";
-}
+      $("howTitle").textContent = t.howTitle;
+      const howList = $("howList");
+      howList.innerHTML = "";
+      t.howList.forEach(line=>{
+        const li = document.createElement("li");
+        li.textContent = line;
+        howList.appendChild(li);
+      });
 
-toggle.onclick = () => {
-  document.body.classList.toggle("dark");
+      $("faqTitle").textContent = t.faqTitle;
+      $("q1").textContent = t.q1; $("a1").textContent = t.a1;
+      $("q2").textContent = t.q2; $("a2").textContent = t.a2;
+      $("q3").textContent = t.q3; $("a3").textContent = t.a3;
+      $("q4").textContent = t.q4; $("a4").textContent = t.a4;
+      $("q5").textContent = t.q5; $("a5").textContent = t.a5;
 
-  if(document.body.classList.contains("dark")){
-    toggle.textContent = "☀️";
-    localStorage.setItem("mode","dark");
-  }else{
-    toggle.textContent = "🌙";
-    localStorage.setItem("mode","light");
-  }
-};
-</script>
+      $("relatedTitle").textContent = t.relatedTitle;
+      $("relatedText").textContent = t.relatedText;
 
+      localStorage.setItem("tool_lang", lang);
+
+      // format select first option label
+      const fmt = $("format");
+      fmt.options[0].text = t.formatKeep;
+    }
+    setLang(langSel.value);
+    langSel.addEventListener("change", ()=>setLang(langSel.value));
+
+    $("year").textContent = new Date().getFullYear();
+
+    // ---------- Tool logic ----------
+    const dropZone = $("dropZone");
+    const fileInput = $("fileInput");
+    const list = $("list");
+    const qRange = $("quality");
+    const qVal = $("qualityVal");
+    const fmtSel = $("format");
+    const maxWEl = $("maxW");
+    const maxHEl = $("maxH");
+    const btnCompress = $("btnCompress");
+    const btnZip = $("btnZip");
+    const btnClear = $("btnClear");
+    const bar = $("bar");
+    const statusEl = $("status");
+
+    qVal.textContent = qRange.value;
+    qRange.addEventListener("input", ()=> qVal.textContent = qRange.value);
+
+    const state = {
+      files: [],        // {id, file, url, width, height}
+      outputs: new Map()// id -> { blob, url, name, beforeBytes, afterBytes }
+    };
+
+    function humanBytes(bytes){
+      const units = ["B","KB","MB","GB"];
+      let v = bytes, i = 0;
+      while(v >= 1024 && i < units.length-1){ v /= 1024; i++; }
+      const dp = i === 0 ? 0 : 1;
+      return `${v.toFixed(dp)} ${units[i]}`;
+    }
+
+    function safeName(name){
+      return name.replace(/[^\w.\-() ]+/g, "_");
+    }
+
+    function setStatus(text){ statusEl.textContent = text; }
+
+    function resetProgress(){
+      bar.style.width = "0%";
+    }
+
+    function setProgress(p){
+      bar.style.width = `${Math.max(0, Math.min(100, p))}%`;
+    }
+
+    function addFiles(files){
+      const imgs = Array.from(files).filter(f=>f.type.startsWith("image/"));
+      if(!imgs.length) return;
+
+      for(const f of imgs){
+        const id = crypto.randomUUID ? crypto.randomUUID() : (Date.now()+"_"+Math.random().toString(16).slice(2));
+        const url = URL.createObjectURL(f);
+        state.files.push({ id, file:f, url, width:null, height:null });
+      }
+      renderList();
+      const t = I18N[langSel.value] || I18N.bn;
+      setStatus(t.statusReady(state.files.length));
+    }
+
+    function clearAll(){
+      for(const x of state.files){ try{ URL.revokeObjectURL(x.url);}catch{} }
+      for(const v of state.outputs.values()){ try{ URL.revokeObjectURL(v.url);}catch{} }
+      state.files = [];
+      state.outputs.clear();
+      list.innerHTML = "";
+      btnZip.disabled = true;
+      resetProgress();
+      const t = I18N[langSel.value] || I18N.bn;
+      setStatus(t.statusIdle);
+    }
+
+    dropZone.addEventListener("click", ()=> fileInput.click());
+    dropZone.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); fileInput.click(); }
+    });
+
+    fileInput.addEventListener("change", (e)=>{
+      addFiles(e.target.files);
+      fileInput.value = "";
+    });
+
+    dropZone.addEventListener("dragover", (e)=>{
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave", ()=> dropZone.classList.remove("dragover"));
+    dropZone.addEventListener("drop", (e)=>{
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      if(e.dataTransfer?.files) addFiles(e.dataTransfer.files);
+    });
+
+    function renderList(){
+      list.innerHTML = "";
+      const t = I18N[langSel.value] || I18N.bn;
+
+      for(const item of state.files){
+        const out = state.outputs.get(item.id);
+
+        const el = document.createElement("div");
+        el.className = "item";
+
+        const thumb = document.createElement("div");
+        thumb.className = "thumb";
+        const img = document.createElement("img");
+        img.src = out?.url || item.url;
+        img.alt = item.file.name;
+        thumb.appendChild(img);
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+
+        const name = document.createElement("b");
+        name.textContent = item.file.name;
+
+        const stats = document.createElement("div");
+        stats.className = "stats";
+        const before = item.file.size;
+
+        let statsHTML = `<span><b>${t.before}:</b> ${humanBytes(before)}</span>`;
+        if(out){
+          const after = out.afterBytes;
+          const saved = before > 0 ? Math.max(0, Math.round((1 - (after/before))*100)) : 0;
+          const cls = after <= before ? "ok" : "bad";
+          statsHTML += ` <span><b>${t.after}:</b> ${humanBytes(after)}</span>`;
+          statsHTML += ` <span class="${cls}"><b>${t.saved}:</b> ${saved}%</span>`;
+        }else{
+          statsHTML += ` <span class="tag">—</span>`;
+        }
+        stats.innerHTML = statsHTML;
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const btnRemove = document.createElement("button");
+        btnRemove.className = "btn secondary";
+        btnRemove.type = "button";
+        btnRemove.textContent = t.remove;
+        btnRemove.addEventListener("click", ()=>{
+          // cleanup
+          try{ URL.revokeObjectURL(item.url);}catch{}
+          const out2 = state.outputs.get(item.id);
+          if(out2){ try{ URL.revokeObjectURL(out2.url);}catch{} }
+          state.outputs.delete(item.id);
+          state.files = state.files.filter(x=>x.id !== item.id);
+          renderList();
+          btnZip.disabled = state.outputs.size === 0;
+          if(state.files.length === 0){
+            const tt = I18N[langSel.value] || I18N.bn;
+            setStatus(tt.statusIdle);
+          }
+        });
+
+        actions.appendChild(btnRemove);
+
+        if(out){
+          const btnDown = document.createElement("a");
+          btnDown.className = "btn primary";
+          btnDown.textContent = t.download;
+          btnDown.href = out.url;
+          btnDown.download = out.name;
+          actions.appendChild(btnDown);
+        }
+
+        meta.appendChild(name);
+        meta.appendChild(stats);
+        meta.appendChild(actions);
+
+        el.appendChild(thumb);
+        el.appendChild(meta);
+
+        list.appendChild(el);
+      }
+    }
+
+    // Presets
+    $("presetSmall").addEventListener("click", ()=>{
+      qRange.value = "55"; qVal.textContent = "55";
+      fmtSel.value = "image/webp";
+      maxWEl.value = "1280";
+      maxHEl.value = "";
+    });
+    $("presetMedium").addEventListener("click", ()=>{
+      qRange.value = "72"; qVal.textContent = "72";
+      fmtSel.value = "image/webp";
+      maxWEl.value = "1600";
+      maxHEl.value = "";
+    });
+    $("presetHigh").addEventListener("click", ()=>{
+      qRange.value = "85"; qVal.textContent = "85";
+      fmtSel.value = "keep";
+      maxWEl.value = "";
+      maxHEl.value = "";
+    });
+
+    async function decodeToBitmap(file){
+      // Better performance vs <img> for modern browsers
+      if("createImageBitmap" in window){
+        return await createImageBitmap(file);
+      }
+      // fallback
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.decoding = "async";
+      img.src = url;
+      await img.decode();
+      URL.revokeObjectURL(url);
+      // emulate bitmap
+      return img;
+    }
+
+    function computeTargetSize(w,h,maxW,maxH){
+      if(!maxW && !maxH) return {w,h};
+      let tw = w, th = h;
+
+      const mw = Number(maxW) || 0;
+      const mh = Number(maxH) || 0;
+
+      // If only one specified, scale by that constraint
+      const scaleW = mw > 0 ? (mw / w) : 1;
+      const scaleH = mh > 0 ? (mh / h) : 1;
+      const scale = Math.min(scaleW, scaleH, 1); // never upscale
+      tw = Math.round(w * scale);
+      th = Math.round(h * scale);
+      return {w:tw, h:th};
+    }
+
+    function canvasToBlob(canvas, mime, quality){
+      return new Promise((resolve)=>{
+        // png ignores quality
+        canvas.toBlob((blob)=> resolve(blob), mime, quality);
+      });
+    }
+
+    async function compressOne(file, opts){
+      const bitmap = await decodeToBitmap(file);
+      const w = bitmap.width, h = bitmap.height;
+
+      const { w:tw, h:th } = computeTargetSize(w, h, opts.maxW, opts.maxH);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = tw;
+      canvas.height = th;
+      const ctx = canvas.getContext("2d", { alpha:true });
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(bitmap, 0, 0, tw, th);
+
+      // choose output mime
+      let outMime = opts.mime;
+      if(outMime === "keep"){
+        // keep original, but if original is not jpeg/webp/png, default to jpeg
+        const t = file.type;
+        if(t === "image/jpeg" || t === "image/png" || t === "image/webp") outMime = t;
+        else outMime = "image/jpeg";
+      }
+
+      const q = Math.max(0.1, Math.min(0.95, opts.quality));
+      const blob = await canvasToBlob(canvas, outMime, q);
+
+      // cleanup bitmap if possible
+      try{ if(bitmap.close) bitmap.close(); }catch{}
+
+      return { blob, outMime, width:tw, height:th };
+    }
+
+    btnCompress.addEventListener("click", async ()=>{
+      const t = I18N[langSel.value] || I18N.bn;
+
+      if(state.files.length === 0){
+        setStatus(langSel.value==="bn" ? "⚠️ আগে ছবি যোগ করুন।" : "⚠️ Please add images first.");
+        return;
+      }
+
+      // clear old outputs (keep originals)
+      for(const v of state.outputs.values()){ try{ URL.revokeObjectURL(v.url);}catch{} }
+      state.outputs.clear();
+      btnZip.disabled = true;
+
+      resetProgress();
+
+      const quality = Number(qRange.value) / 100; // 0.10..0.95
+      const mime = fmtSel.value;
+      const maxW = maxWEl.value;
+      const maxH = maxHEl.value;
+
+      const n = state.files.length;
+
+      for(let i=0;i<n;i++){
+        setStatus(t.statusWorking(i+1, n));
+        setProgress(((i)/n)*100);
+
+        const it = state.files[i];
+        try{
+          const res = await compressOne(it.file, { quality, mime, maxW, maxH });
+
+          const ext = res.outMime === "image/webp" ? "webp"
+                    : res.outMime === "image/png" ? "png"
+                    : "jpg";
+
+          const base = safeName(it.file.name.replace(/\.[^.]+$/, ""));
+          const name = `${base}-compressed.${ext}`;
+
+          const url = URL.createObjectURL(res.blob);
+          state.outputs.set(it.id, {
+            blob: res.blob,
+            url,
+            name,
+            beforeBytes: it.file.size,
+            afterBytes: res.blob.size
+          });
+        }catch(err){
+          console.error(err);
+        }
+
+        renderList();
+        setProgress(((i+1)/n)*100);
+      }
+
+      setStatus(t.statusDone(state.outputs.size));
+      btnZip.disabled = state.outputs.size === 0;
+    });
+
+    btnZip.addEventListener("click", async ()=>{
+      const t = I18N[langSel.value] || I18N.bn;
+      if(state.outputs.size === 0) return;
+
+      setStatus(t.downloading);
+      const zip = new JSZip();
+
+      for(const [id, out] of state.outputs.entries()){
+        zip.file(out.name, out.blob);
+      }
+      const blob = await zip.generateAsync({ type:"blob", compression:"DEFLATE", compressionOptions:{ level:6 }});
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "compressed-images.zip";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(()=>{ try{ URL.revokeObjectURL(url);}catch{} }, 2000);
+      const tt = I18N[langSel.value] || I18N.bn;
+      setStatus(tt.statusDone(state.outputs.size));
+    });
+
+    btnClear.addEventListener("click", clearAll);
+
+  </script>
 </body>
 </html>
